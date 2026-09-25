@@ -14,8 +14,7 @@ package tresEnRaya;
  */
 public class Tablero {
 
-    private final int tamanio;
-    private final Ficha[][] casillas;
+    private final Ficha[][] tablero;
 
     /**
      * Crea un tablero de tamanio x tamanio casillas.
@@ -23,8 +22,7 @@ public class Tablero {
      * @param tamanio dimensión del tablero (ej. 3 para tres en raya)
      */
     public Tablero(int tamanio) {
-        this.tamanio = tamanio;
-        this.casillas = new Ficha[tamanio][tamanio];
+        this.tablero = new Ficha[tamanio][tamanio];
     }
 
     /**
@@ -36,13 +34,17 @@ public class Tablero {
      * @return true si la jugada se ha realizado; false si la posición no es válida o está ocupada
      */
     public boolean jugar(Ficha ficha, int fila, int columna) {
-        if (fila < 0 || fila >= tamanio || columna < 0 || columna >= tamanio) {
+        if (ficha == null) {
             return false;
         }
-        if (casillas[fila][columna] != null) {
+        if (fila < 0 || fila >= tablero.length
+                || columna < 0 || columna >= tablero.length) {
             return false;
         }
-        casillas[fila][columna] = ficha;
+        if (tablero[fila][columna] != null) {
+            return false;
+        }
+        tablero[fila][columna] = ficha;
         return true;
     }
 
@@ -52,9 +54,9 @@ public class Tablero {
      * @return true si no hay ninguna casilla vacía
      */
     public boolean estaLleno() {
-        for (int f = 0; f < tamanio; f++) {
-            for (int c = 0; c < tamanio; c++) {
-                if (casillas[f][c] == null) {
+        for (int f = 0; f < tablero.length; f++) {
+            for (int c = 0; c < tablero.length; c++) {
+                if (tablero[f][c] == null) {
                     return false;
                 }
             }
@@ -62,19 +64,6 @@ public class Tablero {
         return true;
     }
 
-    /**
-     * Devuelve la ficha ganadora, o null si no hay ganador todavía.
-     *
-     * @return Ficha.X, Ficha.O, o null
-     */
-    public Ficha ganador() {
-        for (Ficha ficha : Ficha.values()) {
-            if (gana(ficha)) {
-                return ficha;
-            }
-        }
-        return null;
-    }
 
     /**
      * Comprueba si la ficha indicada ha ganado (en cualquier dirección).
@@ -90,16 +79,34 @@ public class Tablero {
     }
 
     /**
+     * Devuelve la ficha que ha conseguido una línea, o null si no hay ganador.
+     *
+     * @return Ficha.X, Ficha.O o null
+     */
+    public Ficha ganador() {
+        if (gana(Ficha.X)) {
+            return Ficha.X;
+        }
+        if (gana(Ficha.O)) {
+            return Ficha.O;
+        }
+        return null;
+    }
+
+    /**
      * Comprueba si la ficha gana en alguna fila horizontal.
      *
      * @param ficha la ficha a comprobar
      * @return true si hay tres en raya horizontal
      */
     protected boolean ganaHorizontal(Ficha ficha) {
-        for (int f = 0; f < tamanio; f++) {
+        if (ficha == null || tablero.length == 0) {
+            return false;
+        }
+        for (int f = 0; f < tablero.length; f++) {
             boolean linea = true;
-            for (int c = 0; c < tamanio; c++) {
-                if (casillas[f][c] != ficha) {
+            for (int c = 0; c < tablero.length; c++) {
+                if (tablero[f][c] != ficha) {
                     linea = false;
                     break;
                 }
@@ -116,10 +123,13 @@ public class Tablero {
      * @return true si hay tres en raya vertical
      */
     protected boolean ganaVertical(Ficha ficha) {
-        for (int c = 0; c < tamanio; c++) {
+        if (ficha == null || tablero.length == 0) {
+            return false;
+        }
+        for (int c = 0; c < tablero.length; c++) {
             boolean linea = true;
-            for (int f = 0; f < tamanio; f++) {
-                if (casillas[f][c] != ficha) {
+            for (int f = 0; f < tablero.length; f++) {
+                if (tablero[f][c] != ficha) {
                     linea = false;
                     break;
                 }
@@ -136,8 +146,11 @@ public class Tablero {
      * @return true si hay tres en raya en la diagonal directa
      */
     protected boolean ganaDiagonalDirecta(Ficha ficha) {
-        for (int i = 0; i < tamanio; i++) {
-            if (casillas[i][i] != ficha) {
+        if (ficha == null || tablero.length == 0) {
+            return false;
+        }
+        for (int i = 0; i < tablero.length; i++) {
+            if (tablero[i][i] != ficha) {
                 return false;
             }
         }
@@ -151,8 +164,11 @@ public class Tablero {
      * @return true si hay tres en raya en la diagonal indirecta
      */
     protected boolean ganaDiagonalIndirecta(Ficha ficha) {
-        for (int i = 0; i < tamanio; i++) {
-            if (casillas[i][tamanio - 1 - i] != ficha) {
+        if (ficha == null || tablero.length == 0) {
+            return false;
+        }
+        for (int i = 0; i < tablero.length; i++) {
+            if (tablero[i][tablero.length - 1 - i] != ficha) {
                 return false;
             }
         }
@@ -165,21 +181,18 @@ public class Tablero {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        // Encabezado de columnas
         sb.append("  ");
-        for (int c = 0; c < tamanio; c++) {
+        for (int c = 0; c < tablero.length; c++) {
             sb.append(c).append(" ");
         }
         sb.append("\n");
-        // Separador
         sb.append("  ");
-        sb.append("--".repeat(tamanio));
+        sb.append("--".repeat(tablero.length));
         sb.append("\n");
-        // Filas
-        for (int f = 0; f < tamanio; f++) {
+        for (int f = 0; f < tablero.length; f++) {
             sb.append(f).append("|");
-            for (int c = 0; c < tamanio; c++) {
-                sb.append(casillas[f][c] == null ? "." : casillas[f][c]);
+            for (int c = 0; c < tablero.length; c++) {
+                sb.append(tablero[f][c] == null ? "." : tablero[f][c]);
                 sb.append(" ");
             }
             sb.append("\n");

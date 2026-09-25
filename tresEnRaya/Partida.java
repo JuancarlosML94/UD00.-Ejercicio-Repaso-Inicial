@@ -74,19 +74,6 @@ public class Partida {
      */
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("=== Tres en Raya ===\n");
-        sb.append(tablero);
-        if (terminada()) {
-            Ficha g = ganador();
-            if (g != null) {
-                sb.append("¡Gana ").append(g).append("!\n");
-            } else {
-                sb.append("¡Empate!\n");
-            }
-        } else {
-            sb.append("Turno: ").append(turno).append("\n");
-        }
-        return sb.toString();
+        return tablero.toString();
     }
 }

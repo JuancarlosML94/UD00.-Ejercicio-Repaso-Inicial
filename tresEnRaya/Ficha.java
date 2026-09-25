@@ -16,9 +16,4 @@ public enum Ficha {
     public Ficha siguiente() {
         return this == X ? O : X;
     }
-
-    @Override
-    public String toString() {
-        return name();
-    }
 }
